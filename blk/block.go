@@ -1,7 +1,10 @@
 package blk
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -29,6 +32,26 @@ func NewBlock(data string, height int64, prevBlockHash []byte) *Block {
 	block.Nonce = nonce
 
 	return block
+}
+
+func (blk *Block) Serialize() []byte {
+	var result bytes.Buffer
+	encoder := gob.NewEncoder(&result)
+	err := encoder.Encode(blk)
+	if err != nil {
+		log.Panic(err)
+	}
+	return result.Bytes()
+}
+
+func Deserialize(blockBytes []byte) *Block {
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(blockBytes))
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic(err)
+	}
+	return &block
 }
 
 // CreateGenesisBlock 生成创世区块
